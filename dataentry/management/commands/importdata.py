@@ -4,8 +4,12 @@ from django.core.management.base import BaseCommand, CommandError
 # imports all the user installed apps
 from django.apps import apps
 import csv
+from django.db import DataError
+
 
 # proposed command - python manage.py importdata source_file_path target_model_table
+
+
 class Command(BaseCommand):
     help = 'Imports data from CSV file'
 
@@ -35,10 +39,23 @@ class Command(BaseCommand):
         if not target_model:
             raise CommandError(f'Model "{model_name}" not found in any app.')
 
+        # get all the field names of the model that we found EXCEPT THE PK or ID
+        model_fields = [field.name for field in target_model._meta.fields if field.name !=
+                        'id']
+        print(model_fields)
+
         # opens the file for reading and closes it automatically
         with open(file_path, 'r') as file:
-            # reads the csv file
+            # reads the csv file including the header
             reader = csv.DictReader(file)
+            # gets the header names of the csv file
+            csv_header = reader.fieldnames
+
+            # compare CSV header with the model's field names and throw appropriate message
+            if csv_header != model_fields:
+                raise DataError(
+                    f'CSV file does not match with the {model_name} table fields')
+
             # print(reader)
             for row in reader:
                 # adds the row into our database Student table;
