@@ -1,9 +1,13 @@
 from django.apps import apps
+from django.core.management.base import CommandError
+import csv
+from django.db import DataError
+from django.core.mail import EmailMessage
+from django.conf import settings
+
 
 # extracts only the user-created models
 # excludes default models like Users, etc
-
-
 def get_all_custom_models():
     # lists the default models that we dont want to display in our Upload Form
     default_models = ['ContentType', 'Session',
@@ -17,3 +21,51 @@ def get_all_custom_models():
             custom_models.append(model.__name__)
         # print(model)
     return custom_models
+
+
+# celery custom function to check for errors before Celery does its task
+def check_csv_error(file_path, model_name):
+    # search for the model across all intalled apps
+    target_model = None
+    for my_app_config in apps.get_app_configs():
+        # Try to search for the target model where we will save our imported data
+        try:
+            # returns the model name  of the app
+            target_model = apps.get_model(my_app_config.label, model_name)
+            break  # stops search once the model is found
+        except LookupError:
+            continue  # model is not found, then keep searching in the next app
+    # if model is empty/not found
+    if not target_model:
+        raise CommandError(f'Model "{model_name}" not found in any app.')
+
+    # get all the field names of the model that we found EXCEPT THE PK or ID
+    model_fields = [field.name for field in target_model._meta.fields if field.name !=
+                    'id']
+    # print(model_fields)
+    try:
+        # opens the file for reading and closes it automatically
+        with open(file_path, 'r') as file:
+            # reads the csv file including the header
+            reader = csv.DictReader(file)
+            # gets the header names of the csv file
+            csv_header = reader.fieldnames
+            # compare CSV header with the model's field names and throw appropriate message
+            if csv_header != model_fields:
+                raise DataError(
+                    f'CSV file does not match with the {model_name} table fields')
+    except Exception as e:
+        raise e
+    # if there is no error, we return the model name
+    return target_model
+
+# sends an email with dynamic subject, message and recipient's address
+def send_email_notification(mail_subject, message_body, to_email_addresses):
+    try:
+        # calls our environment varialbe. DEFAULT_FROM_EMAIL from settings.py
+        from_email = settings.DEFAULT_FROM_EMAIL
+        mail = EmailMessage(mail_subject, message_body,
+                            from_email, to=[to_email_addresses])
+        mail.send()  # sends our mail
+    except Exception as e:
+        raise e

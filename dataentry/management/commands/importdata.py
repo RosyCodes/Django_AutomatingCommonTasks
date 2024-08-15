@@ -6,6 +6,9 @@ from django.apps import apps
 import csv
 from django.db import DataError
 
+# imports our function from dataentry\utils.py
+from dataentry.utils import check_csv_error
+
 
 # proposed command - python manage.py importdata source_file_path target_model_table
 
@@ -24,39 +27,13 @@ class Command(BaseCommand):
         file_path = kwargs['file_path']
         model_name = kwargs['model_name'].capitalize()
 
-        # search for the model across all intalled apps
-        target_model = None
-        for my_app_config in apps.get_app_configs():
-            # Try to search for the target model where we will save our imported data
-            try:
-                # returns the model name  of the app
-                target_model = apps.get_model(my_app_config.label, model_name)
-                break  # stops search once the model is found
-            except LookupError:
-                continue  # model is not found, then keep searching in the next app
+        # calls the check_csv_error function in dataentry\utils.property
+        target_model = check_csv_error(file_path, model_name)
 
-        # if model is empty/not found
-        if not target_model:
-            raise CommandError(f'Model "{model_name}" not found in any app.')
-
-        # get all the field names of the model that we found EXCEPT THE PK or ID
-        model_fields = [field.name for field in target_model._meta.fields if field.name !=
-                        'id']
-        print(model_fields)
-
-        # opens the file for reading and closes it automatically
         with open(file_path, 'r') as file:
-            # reads the csv file including the header
             reader = csv.DictReader(file)
-            # gets the header names of the csv file
-            csv_header = reader.fieldnames
-
-            # compare CSV header with the model's field names and throw appropriate message
-            if csv_header != model_fields:
-                raise DataError(
-                    f'CSV file does not match with the {model_name} table fields')
-
             # print(reader)
+            # save into our desired target model if there is no error
             for row in reader:
                 # adds the row into our database Student table;
                 # Student.objects.create(**row)

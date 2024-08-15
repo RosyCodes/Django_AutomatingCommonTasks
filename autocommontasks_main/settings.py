@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from django.contrib.messages import constants as messages
 from pathlib import Path
+# hide our sensitive user credentials using environment variables
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,10 +23,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-x91*m2r@y&il)m4-kdyd3e+b5c(&&jxyb!3oz%8tt&#-^%t)#='
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# converts the string value of Debug into boolean
+DEBUG = config('DEBUG', default=False, cast=bool)  # True or False
 
 ALLOWED_HOSTS = []
 
@@ -119,6 +122,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = ['autocommontasks_main/static']  # this is the source folder
+# this is the destination folder after COLLECTSTATIC command
+STATIC_ROOT = BASE_DIR / 'static'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -135,3 +141,15 @@ MESSAGE_TAGS = {
     messages.ERROR: "danger",
     50: "critical",
 }
+
+# Celery-related configuration; setting the message broker
+CELERY_BROKER_URL = 'redis://localhost:6379'
+
+# Email configuration
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT', cast=int)  # converts to integer from string
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'Automate with Django <rnldevsolutions@gmail.com>'
+DEFAULT_TO_EMAIL = 'rosy61625@gmail.com'
