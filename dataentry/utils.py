@@ -4,10 +4,13 @@ import csv
 from django.db import DataError
 from django.core.mail import EmailMessage
 from django.conf import settings
-
+import datetime
+import os
 
 # extracts only the user-created models
 # excludes default models like Users, etc
+
+
 def get_all_custom_models():
     # lists the default models that we dont want to display in our Upload Form
     default_models = ['ContentType', 'Session',
@@ -60,12 +63,35 @@ def check_csv_error(file_path, model_name):
     return target_model
 
 # sends an email with dynamic subject, message and recipient's address
-def send_email_notification(mail_subject, message_body, to_email_addresses):
+# Attachment as an optional value
+
+
+def send_email_notification(mail_subject, message_body, to_email_addresses, attachment=None):
     try:
         # calls our environment varialbe. DEFAULT_FROM_EMAIL from settings.py
         from_email = settings.DEFAULT_FROM_EMAIL
         mail = EmailMessage(mail_subject, message_body,
                             from_email, to=[to_email_addresses])
+        # if file is present as part of our parameters.
+        if attachment is not None:
+            mail.attach_file(attachment)
         mail.send()  # sends our mail
     except Exception as e:
         raise e
+
+# create a csv file name for data export
+
+
+def generate_csv_file(model_name):
+    # generate the timestamp of current data and time
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+
+    # create a destination directory variable for our exported files
+    export_dir = 'exported_data'  # name of our folder
+
+    # export from any given table as a dynamic name.
+    file_name = f'exported_{model_name}_data_{timestamp}.csv'
+    # combines our MEDIA_ROOT directory with the export_dir and the filename
+    file_path = os.path.join(settings.MEDIA_ROOT, export_dir, file_name)
+    # print('File path - > ', file_path)
+    return file_path

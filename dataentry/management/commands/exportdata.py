@@ -6,10 +6,10 @@ from django.core.management import BaseCommand
 from django.apps import apps
 import datetime
 
+# imports our generate_csv_file funtion from dataentry\utils.py
+from dataentry.utils import generate_csv_file
 # proposed command = python manage.py exportdata
 # proposed command = python manage.py exportdata <modelname>
-
-
 class Command(BaseCommand):
     help = 'This will export data from any database model  to a CSV file.'
 
@@ -41,14 +41,20 @@ class Command(BaseCommand):
         # fetch data from the given desired model name
         data = target_model.objects.all()
 
-        # generate the timestamp of current data and time
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        # call a helper function from UTILS.PY
+        file_path = generate_csv_file(model_name)
 
-        # define the csv filename/path
+        # We move this block to UTILS.PY  generate_csv_file function
+        # ---
+        # generate the timestamp of current data and time
+        # timestamp = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+
+        # define the csv filename/path as a static filename
         # file_path = f'exported_students_data_{timestamp}.csv'
 
-        # export from any given table
-        file_path = f'exported_{model_name}_data_{timestamp}.csv'
+        # export from any given table as a dynamic name.
+        # file_path = f'exported_{model_name}_data_{timestamp}.csv'
+        # --
 
         print(file_path)
 
@@ -74,4 +80,4 @@ class Command(BaseCommand):
                                 for field in target_model._meta.fields])
 
         self.stdout.write(self.style.SUCCESS(
-            'Data exported to CSV file successfully.'))
+            'Data exported as CSV file successfully.'))

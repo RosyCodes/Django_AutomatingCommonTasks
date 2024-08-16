@@ -4,7 +4,8 @@ from uploads.models import Upload
 from django.conf import settings
 from django.contrib import messages
 # imports our celery function
-from .tasks import import_data_task
+from .tasks import import_data_task, export_data_task
+from django.core.management import call_command
 
 
 def import_data(request):
@@ -47,3 +48,23 @@ def import_data(request):
             'custom_models': custom_models,
         }
     return render(request, 'dataentry/importdata.html', context)
+
+
+def export_data(request):
+    if request.method == 'POST':
+        # gets the value from our UI form
+        model_name = request.POST.get('model_name')
+        # calls our export data function from TASKS.PY to execute using celery
+        export_data_task.delay(model_name)
+        # show the message the user
+        messages.success(
+            request, 'Your data from the is being exported, you will be notified once this ia done.')
+        return redirect('export_data')
+    else:
+        # calls our dataentry\utils.py to extract only user-created models
+        custom_models = get_all_custom_models()
+        # print(custom_models)
+        context = {
+            'custom_models': custom_models,
+        }
+    return render(request, 'dataentry/exportdata.html', context)

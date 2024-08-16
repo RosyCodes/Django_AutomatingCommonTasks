@@ -4,7 +4,7 @@ import time
 from django.core.management import call_command
 # from django.core.mail import EmailMessage
 from django.conf import settings
-from .utils import send_email_notification
+from .utils import send_email_notification, generate_csv_file
 
 
 @app.task  # uses a decorator as a celery task for testing
@@ -48,3 +48,28 @@ def import_data_task(file_path, model_name):
     send_email_notification(mail_subject, message_body, to_email_addresses)
     # shows a message in the terminal
     return 'Data imported successfully.'
+
+
+@app.task  # uses a decorator as a celery task for exporting our model data
+def export_data_task(model_name):
+    try:
+        # call and execute our custom-management command exportdata with the model_name
+        call_command('exportdata', model_name)
+    except Exception as e:
+        raise e
+
+    # call our helper function from UTILS.pY
+    file_path = generate_csv_file(model_name)
+    # print("file path -> ", file_path)
+
+    # notify the user via email IF there is no error
+    mail_subject = 'Export Database Data Completed'
+    message_body = 'Your data export has been successfully completed. Please find the file attachment.'
+    # calls our default_to_email value from settings.py
+    to_email_addresses = settings.DEFAULT_TO_EMAIL
+
+    # calls our EMAIL FUNCTION HELPER INSTEAD in UTILS.py
+    send_email_notification(mail_subject, message_body,
+                            to_email_addresses, attachment=file_path)
+    # shows a message in the terminal
+    return 'Export Data Task completed successfully.'
