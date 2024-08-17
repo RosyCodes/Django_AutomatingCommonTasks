@@ -38,7 +38,7 @@ def import_data(request):
 
         # show the message the user
         messages.success(
-            request, 'Your data is being imported, you will be notified once this ia done.')
+            request, 'Your data is being imported, you will be notified once this is done.')
         return redirect('import_data')
     else:
         # calls our dataentry\utils.py to extract only user-created models
@@ -58,7 +58,7 @@ def export_data(request):
         export_data_task.delay(model_name)
         # show the message the user
         messages.success(
-            request, 'Your data from the is being exported, you will be notified once this ia done.')
+            request, 'Your data is being exported, you will be notified once this is done.')
         return redirect('export_data')
     else:
         # calls our dataentry\utils.py to extract only user-created models
