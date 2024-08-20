@@ -30,6 +30,6 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('login/', views.login, name='login'),
     path('logout/', views.logout, name='logout'),
-
-
+    # Email tasks to forward to emails app's urls.py
+    path('emails/', include('emails.urls'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

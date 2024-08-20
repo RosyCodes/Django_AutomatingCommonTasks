@@ -15,3 +15,5 @@ class RegistrationForm(UserCreationForm):
         #  the mmodel fields we need to display on our form
         fields = ('first_name', 'last_name', 'username',
                   'email', 'password1', 'password2')
+
+

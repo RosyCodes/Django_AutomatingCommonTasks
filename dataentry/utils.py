@@ -71,10 +71,14 @@ def send_email_notification(mail_subject, message_body, to_email_addresses, atta
         # calls our environment varialbe. DEFAULT_FROM_EMAIL from settings.py
         from_email = settings.DEFAULT_FROM_EMAIL
         mail = EmailMessage(mail_subject, message_body,
-                            from_email, to=[to_email_addresses])
+                            from_email, to=to_email_addresses)
         # if file is present as part of our parameters.
         if attachment is not None:
             mail.attach_file(attachment)
+
+        # send the mail as HTML content without the HTML tags
+        mail.content_subtype = "html"
+        
         mail.send()  # sends our mail
     except Exception as e:
         raise e
