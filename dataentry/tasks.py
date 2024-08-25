@@ -45,7 +45,7 @@ def import_data_task(file_path, model_name):
     to_email_addresses = settings.DEFAULT_TO_EMAIL
 
     # calls our EMAIL FUNCTION HELPER INSTEAD in UTILS.py
-    send_email_notification(mail_subject, message_body, to_email_addresses)
+    send_email_notification(mail_subject, message_body, [to_email_addresses])
     # shows a message in the terminal
     return 'Data imported successfully.'
 
@@ -70,6 +70,6 @@ def export_data_task(model_name):
 
     # calls our EMAIL FUNCTION HELPER INSTEAD in UTILS.py
     send_email_notification(mail_subject, message_body,
-                            to_email_addresses, attachment=file_path)
+                            [to_email_addresses], attachment=file_path)
     # shows a message in the terminal
     return 'Export Data Task completed successfully.'

@@ -4,7 +4,7 @@ from dataentry.utils import send_email_notification
 
 
 @app.task
-def send_email_task(mail_subject, message_body, to_email_addresses, attachment):
+def send_email_task(mail_subject, message_body, to_email_addresses, attachment, email_id):
     send_email_notification(mail_subject, message_body,
-                            to_email_addresses, attachment)
+                            to_email_addresses, attachment, email_id)
     return 'Email sending task executed successfully.'
