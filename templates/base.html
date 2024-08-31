@@ -35,7 +35,7 @@
                 {% if user.is_authenticated %}
                 <!-- show logout button -->
                 <div>
-                    Logged in as: {{user}}
+                    Logged in as: {{user | capfirst }}
                     <a href="{% url 'logout' %}" class="float-right  btn btn-outline-danger">Logout</a>
 
                 </div>
