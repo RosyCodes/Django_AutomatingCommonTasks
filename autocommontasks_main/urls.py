@@ -33,6 +33,8 @@ urlpatterns = [
     # Email tasks to forward to emails app's urls.py
     path('emails/', include('emails.urls')),
     # Image compression tasks
-    path('image-compression/', include('image_compression.urls'))
+    path('image-compression/', include('image_compression.urls')),
+    # stock market analysis app's urls.py
+    path('webscraping/', include('stock_analysis.urls'))
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

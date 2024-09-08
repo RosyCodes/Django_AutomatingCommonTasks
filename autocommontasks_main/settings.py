@@ -31,13 +31,15 @@ DEBUG = config('DEBUG', default=False, cast=bool)  # True or False
 
 # Ngrok Configurarion ; must change whenever we stop Ngrok
 ALLOWED_HOSTS = ['*']
-BASE_URL = 'https://1712-24-208-49-166.ngrok-free.app'
-CSRF_TRUSTED_ORIGINS = ['https://1712-24-208-49-166.ngrok-free.app']
+BASE_URL = 'https://joey-current-pleasantly.ngrok-free.app'
+CSRF_TRUSTED_ORIGINS = ['https://joey-current-pleasantly.ngrok-free.app']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'dal',
+    'dal_select2',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -52,6 +54,7 @@ INSTALLED_APPS = [
     'ckeditor',
     'anymail',
     'image_compression',
+    'stock_analysis',
 ]
 
 MIDDLEWARE = [
